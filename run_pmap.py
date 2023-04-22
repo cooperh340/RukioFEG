@@ -3,7 +3,6 @@ import time
 import jax
 import jax.numpy as jnp
 from datasets import concatenate_datasets, load_dataset
-from flax.training.common_utils import shard
 from transformers import FlaxWhisperForConditionalGeneration, WhisperProcessor
 
 
@@ -32,7 +31,6 @@ processor = WhisperProcessor.from_pretrained("openai/whisper-tiny.en")
 
 
 def preprocess(batch):
-    batch["input_features"] = processor(
         batch["audio"]["array"], sampling_rate=16000, return_tensors="np"
     ).input_features[0]
     return batch
@@ -51,7 +49,6 @@ for batch_size in BATCH_SIZES:
     # warm-up step
     batch = next(iter(eval_dataloader))
     input_features = shard(batch["input_features"])
-    pred_ids = p_generate_fn(input_features)
 
     start = time.time()
     for batch in eval_dataloader:
